@@ -39,10 +39,10 @@ Note:
 """
 
 from math import ceil
-import Tkinter
+import tkinter
 import numpy as np
 import hardware_controller as hc
-from Tkinter import Canvas
+from tkinter import Canvas
 import math
 
 CM = hc.cm
@@ -65,7 +65,7 @@ class Gui(Canvas):
         self.gpio = list()
         self.state = list()
         self.channels = [_ for _ in range(self.gpiolen)]
-        self.channel_keys = CM.network.channels.keys()
+        self.channel_keys = list(CM.network.channels.keys())
         self.network = hc.network
         self.red = "#FF0000"
         self.green = "#00FF00"
@@ -138,7 +138,7 @@ class Gui(Canvas):
                 row_worker += spacing
                 row_counter = 0
 
-        self.pack(fill=Tkinter.BOTH, expand=1)
+        self.pack(fill=tkinter.BOTH, expand=1)
 
     def start_display(self):
         """
@@ -222,7 +222,7 @@ class Gui(Canvas):
                                                     int(ceil(brightness * 2.55)))
             try:
                 item = self.gpio[pin]
-                print item, level, brightness, int(ceil(brightness * 2.55))
+                print(item, level, brightness, int(ceil(brightness * 2.55)))
                 self.itemconfig(item, fill=level)
                 self.parent.update()
             except:
@@ -242,7 +242,7 @@ class Gui(Canvas):
 
 def main():
     """main function, start the process"""
-    parent = Tkinter.Tk()
+    parent = tkinter.Tk()
     parent.geometry("250x150+300+300")
     Gui(parent)
     parent.mainloop()

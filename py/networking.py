@@ -12,7 +12,7 @@ The network controller handles all interaction with the raspberry pi
 to send or receive data to/from lightshowpi network enabled raspberry pi(s).
 """
 
-import cPickle
+import pickle
 import logging as log
 import socket
 import numpy as np
@@ -48,31 +48,31 @@ class Networking(object):
     def setup_server(self):
         """Setup network broadcast stream if this RPi is to be serving data"""
 
-        print "streaming on port: " + str(self.port)
+        print("streaming on port: " + str(self.port))
         try:
             self.network_stream = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.network_stream.bind(('', 0))
             self.network_stream.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
             log.info("streaming on port: " + str(self.port))
-        except socket.error, msg:
+        except socket.error as msg:
             log.error('Failed create socket or bind. Error code: ' +
                       str(msg[0]) + ' : ' + msg[1])
-            print "error creating and binding socket for broadcast"
+            print("error creating and binding socket for broadcast")
             sys.exit(1)
 
     def setup_client(self):
         """Setup network receive stream if this RPi is to be a client"""
         log.info("Network client mode starting")
-        print "Network client mode starting..."
+        print("Network client mode starting...")
         try:
             self.network_stream = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.network_stream.bind(('', self.port))
 
-            print "listening on port: " + str(self.port)
+            print("listening on port: " + str(self.port))
 
             log.info("client channels mapped as\n" + str(self.channels))
             log.info("listening on port: " + str(self.port))
-        except socket.error, msg:
+        except socket.error as msg:
             log.error('Failed create socket or bind. Error code: ' +
                       str(msg[0]) + ' : ' + msg[1])
             self.network_stream.close()
@@ -92,8 +92,8 @@ class Networking(object):
         """
         try:
             data, address = self.network_stream.recvfrom(self.network_buffer)
-            data = cPickle.loads(data)
-        except (IndexError, cPickle.PickleError):
+            data = pickle.loads(data)
+        except (IndexError, pickle.PickleError):
             data = tuple(np.array([0 for _ in range(cm.hardware.gpio_len)]))
 
         return data
@@ -111,12 +111,12 @@ class Networking(object):
         """
         if self.networking == "server":
             try:
-                data = cPickle.dumps(args)
+                data = pickle.dumps(args)
                 self.network_stream.sendto(data, ('<broadcast>', self.port))
-            except socket.error, msg:
+            except socket.error as msg:
                 if msg[0] != 9:
                     log.error(str(msg[0]) + ' ' + msg[1])
-                    print str(msg[0]) + ' ' + msg[1]
+                    print(str(msg[0]) + ' ' + msg[1])
 
     def set_playing(self):
         """Set a flag for playing,

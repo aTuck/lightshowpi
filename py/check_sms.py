@@ -23,7 +23,7 @@ from googlevoice.util import LoginError, ValidationError
 from threading import Thread
 
 import configuration_manager
-import commands
+import subprocess
 
 cm = configuration_manager.Configuration(True)
 
@@ -93,7 +93,7 @@ class Sms(Thread):
         except NameError:
             self.playlist = cm.sms.playlist_path
 
-        commands.start(cm)
+        subprocess.start(cm)
         self.voice = Voice()
 
         self.songs = list()
@@ -210,8 +210,8 @@ class Sms(Thread):
                     logging.error('Invalid playlist.  Each line should be in the form: '
                                   '<song name><tab><path to song>')
                     logging.warning('Removing invalid entry')
-                    print "Error found in playlist"
-                    print "Deleting entry:", song
+                    print("Error found in playlist")
+                    print("Deleting entry:", song)
                     continue
                 elif len(song) == 2:
                     song.append(set())
@@ -261,12 +261,12 @@ class Sms(Thread):
         messages = self.voice.sms().messages
         for msg in self.extract_sms(self.voice.sms.html):
             logging.debug(str(msg))
-            response = commands.execute(msg['text'], msg['from'])
+            response = subprocess.execute(msg['text'], msg['from'])
             if response:
                 logging.info('Request: "' + msg['text'] + '" from ' + msg['from'])
 
                 try:
-                    if isinstance(response, basestring):
+                    if isinstance(response, str):
                         self.voice.send_sms(msg['from'], response)
                     else:
                         # Multiple parts, send them with a delay in hopes to avoid

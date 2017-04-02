@@ -60,7 +60,7 @@ numpy: for FFT calculation
     http://www.numpy.org/
 """
 
-import ConfigParser
+import configparser
 import argparse
 import atexit
 import audioop
@@ -77,7 +77,7 @@ import json
 import signal
 import decoder
 import numpy as np
-import cPickle
+import pickle
 import time
 import errno
 import stat
@@ -90,7 +90,7 @@ import Platform
 import fft
 from prepostshow import PrePostShow
 import RunningStats
-from Queue import Queue, Empty
+from queue import Queue, Empty
 from threading import Thread
 
 
@@ -156,7 +156,7 @@ terminal = False
 if cm.lightshow.use_fifo:
     if os.path.exists(cm.lightshow.fifo):
         os.remove(cm.lightshow.fifo)
-    os.mkfifo(cm.lightshow.fifo, 0777)
+    os.mkfifo(cm.lightshow.fifo, 0o777)
 
 CHUNK_SIZE = 2048  # Use a multiple of 8 (move this to config)
 
@@ -232,7 +232,7 @@ def update_lights(matrix, mean, std):
     if terminal:
         terminal.curses_render(brightness)
     else:
-        for blevel, pin in zip(brightness, range(hc.GPIOLEN)):
+        for blevel, pin in zip(brightness, list(range(hc.GPIOLEN))):
             hc.set_light(pin, True, blevel)
 
 
@@ -339,7 +339,7 @@ def audio_in():
         outthr.start()
 
     log.debug("Running in %s mode - will run until Ctrl+C is pressed" % cm.lightshow.mode)
-    print "Running in %s mode, use Ctrl+C to stop" % cm.lightshow.mode
+    print("Running in %s mode, use Ctrl+C to stop" % cm.lightshow.mode)
 
     # setup light_delay.
     chunks_per_sec = ((16 * num_channels * sample_rate) / 8) / CHUNK_SIZE
@@ -381,7 +381,7 @@ def audio_in():
         except Empty:
             pass
         else:
-            print streamout
+            print(streamout)
             if cm.lightshow.stream_song_delim in streamout:
                 songcount+=1
                 if cm.lightshow.songname_command:
@@ -478,7 +478,7 @@ def load_custom_config(config_filename):
           to regenerate them after making changes.
     """
     if os.path.isfile(config_filename):
-        config = ConfigParser.RawConfigParser(allow_no_value=True)
+        config = configparser.RawConfigParser(allow_no_value=True)
         with open(config_filename) as f:
             config.readfp(f)
 
@@ -487,15 +487,15 @@ def load_custom_config(config_filename):
 
                 always_on = "always_on_channels"
                 if config.has_option(lsc, always_on):
-                    hc.always_on_channels = map(int, config.get(lsc, always_on).split(","))
+                    hc.always_on_channels = list(map(int, config.get(lsc, always_on).split(",")))
 
                 always_off = "always_off_channels"
                 if config.has_option(lsc, always_off):
-                    hc.always_off_channels = map(int, config.get(lsc, always_off).split(","))
+                    hc.always_off_channels = list(map(int, config.get(lsc, always_off).split(",")))
 
                 inverted = "invert_channels"
                 if config.has_option(lsc, inverted):
-                    hc.inverted_channels = map(int, config.get(lsc, inverted).split(","))
+                    hc.inverted_channels = list(map(int, config.get(lsc, inverted).split(",")))
 
                 if config.has_option(lsc, "SD_low"):
                     cm.lightshow.SD_low = config.getfloat(lsc, "SD_low")
@@ -511,11 +511,11 @@ def load_custom_config(config_filename):
                     preshow = None
                     try:
                         preshow_configuration = config.get(lsc, 'preshow_configuration')
-                    except ConfigParser.NoOptionError:
+                    except configparser.NoOptionError:
                         preshow_configuration = None
                     try:
                         preshow_script = config.get(lsc, 'preshow_script')
-                    except ConfigParser.NoOptionError:
+                    except configparser.NoOptionError:
                         preshow_script = None
 
                     if preshow_configuration and not preshow_script:
@@ -562,14 +562,14 @@ def load_custom_config(config_filename):
 
                 if config.has_option('custom_audio_processing', 'custom_channel_mapping'):
                     temp = config.get('custom_audio_processing', 'custom_channel_mapping')
-                    cm.audio_processing.custom_channel_mapping = map(int,
-                                                                     temp.split(',')) if temp else 0
+                    cm.audio_processing.custom_channel_mapping = list(map(int,
+                                                                     temp.split(','))) if temp else 0
 
                 if config.has_option('custom_audio_processing', 'custom_channel_frequencies'):
                     temp = config.get('custom_audio_processing', 'custom_channel_frequencies')
-                    cm.audio_processing.custom_channel_frequencies = map(int,
+                    cm.audio_processing.custom_channel_frequencies = list(map(int,
                                                                          temp.split(
-                                                                             ',')) if temp else 0
+                                                                             ','))) if temp else 0
 
 
 def setup_audio(song_filename):
@@ -733,8 +733,8 @@ def get_song():
                     log.error('Invalid playlist.  Each line should be in the form: '
                               '<song name><tab><path to song>')
                     log.warning('Removing invalid entry')
-                    print "Error found in playlist"
-                    print "Deleting entry:", song
+                    print("Error found in playlist")
+                    print("Deleting entry:", song)
                     continue
                 elif len(song) == 2:
                     song.append(set())
@@ -908,16 +908,16 @@ def network_client():
     read data from the network and blink the lights
     """
     log.info("Network client mode starting")
-    print "Network client mode starting..."
-    print "press CTRL<C> to end"
+    print("Network client mode starting...")
+    print("press CTRL<C> to end")
 
     hc.initialize()
 
-    print
+    print()
 
     try:
         channels = network.channels
-        channel_keys = channels.keys()
+        channel_keys = list(channels.keys())
 
         while True:
             data = network.receive()
@@ -939,7 +939,7 @@ def network_client():
 
     except KeyboardInterrupt:
         log.info("CTRL<C> pressed, stopping")
-        print "stopping"
+        print("stopping")
 
         network.close_connection()
         hc.clean_up()
@@ -966,7 +966,7 @@ def main():
 if __name__ == "__main__":
     # Make sure one of --playlist or --file was specified
     if args.file is None and args.playlist is None:
-        print "One of --playlist or --file must be specified"
+        print("One of --playlist or --file must be specified")
         sys.exit()
 
     if cm.terminal.enabled:
@@ -974,7 +974,7 @@ if __name__ == "__main__":
             terminal = bright_curses.BrightCurses(cm.terminal)
             curses.wrapper(launch_curses)
         except KeyboardInterrupt:
-            print "Got KeyboardInterrupt exception. Exiting..."
+            print("Got KeyboardInterrupt exception. Exiting...")
             exit()
     else:
         main()

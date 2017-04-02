@@ -17,7 +17,7 @@ def main(exit_event):
     # I'm also tracking the time here so that I know when I turned a light off
     # So I'm putting everything in a dict
     gpio_pins = hc._GPIO_PINS
-    lights = dict.fromkeys(range(0, len(gpio_pins)), [True, time.time()])
+    lights = dict.fromkeys(list(range(0, len(gpio_pins))), [True, time.time()])
 
     # get a number that is about 40% the length of your gpio's
     # this will be use to make sure that no more then 40% of
@@ -44,7 +44,7 @@ def main(exit_event):
                     hc.turn_on_light(light)
 
         # count the number of lights that are off
-        off = [k for (k, v) in lights.iteritems() if v.count(1) == False]
+        off = [k for (k, v) in lights.items() if v.count(1) == False]
 
         # if less then out max count of light that we chose
         # we can turn one off
