@@ -13,7 +13,7 @@ Configuration files are all located in the <homedir>/config directory. This file
 manage these configuration files.
 """
 
-import configparser
+import ConfigParser
 import ast
 import datetime
 import fcntl
@@ -69,8 +69,8 @@ class Configuration(object):
         self.state_file = self.config_dir + "state.cfg"
 
         # ConfigParsers
-        self.config = configparser.RawConfigParser(allow_no_value=True)
-        self.state = configparser.RawConfigParser()
+        self.config = ConfigParser.RawConfigParser(allow_no_value=True)
+        self.state = ConfigParser.RawConfigParser()
 
         self.state_section = 'do_not_modify'
 
@@ -134,7 +134,7 @@ class Configuration(object):
         """
         try:
             return self.state.get(self.state_section, name)
-        except (configparser.NoOptionError, configparser.NoSectionError):
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
             return default
 
     def update_state(self, name, value):
@@ -171,12 +171,12 @@ class Configuration(object):
             logging.error("devices not defined or not in JSON format." + str(error))
         hrdwr["devices"] = devices
 
-        for device_type, settings in hrdwr["devices"].items():
+        for device_type, settings in hrdwr["devices"].iteritems():
             for count in range(len(settings)):
-                for k, v in settings[count].items():
+                for k, v in settings[count].iteritems():
                     settings[count][k] = v if not isinstance(v, str) else int(v, 16)
 
-        hrdwr["gpio_pins"] = list(map(int, self.config.get('hardware', 'gpio_pins').split(",")))
+        hrdwr["gpio_pins"] = map(int, self.config.get('hardware', 'gpio_pins').split(","))
         self.gpio_len = len(hrdwr["gpio_pins"])
 
         hrdwr["gpio_len"] = len(hrdwr["gpio_pins"])
@@ -204,7 +204,7 @@ class Configuration(object):
         if len(self.config.get('network', 'channels')) == 0:
             channels = [_ for _ in range(self.gpio_len)]
         else:
-            channels = list(map(int, self.config.get('network', 'channels').split(",")))
+            channels = map(int, self.config.get('network', 'channels').split(","))
 
         temp = defaultdict()
         for channel in range(len(channels)):
@@ -240,7 +240,7 @@ class Configuration(object):
         lghtshw["input_channels"] = self.config.getint(ls, 'input_channels')
         lghtshw["input_sample_rate"] = self.config.getint(ls, 'input_sample_rate')
 
-        lghtshw["songname_command"] = self.config.get(ls, 'songname_command')
+	lghtshw["songname_command"] = self.config.get(ls, 'songname_command')
 
         command_string = self.config.get(ls, 'stream_command_string')
         lghtshw["stream_command_string"] = shlex.split(command_string)
@@ -258,11 +258,11 @@ class Configuration(object):
         lghtshw["randomize_playlist"] = self.config.getboolean(ls, 'randomize_playlist')
 
         onc = "always_on_channels"
-        lghtshw[onc] = list(map(int, self.config.get(ls, onc).split(",")))
+        lghtshw[onc] = map(int, self.config.get(ls, onc).split(","))
         offc = "always_off_channels"
-        lghtshw[offc] = list(map(int, self.config.get(ls, offc).split(",")))
+        lghtshw[offc] = map(int, self.config.get(ls, offc).split(","))
         ic = "invert_channels"
-        lghtshw[ic] = list(map(int, self.config.get(ls, ic).split(",")))
+        lghtshw[ic] = map(int, self.config.get(ls, ic).split(","))
 
         # setup up preshow
         preshow = None
@@ -322,10 +322,10 @@ class Configuration(object):
             self.config.getfloat('audio_processing', 'max_frequency')
         temp = self.config.get('audio_processing', 'custom_channel_mapping')
         audio_prcssng["custom_channel_mapping"] = \
-            list(map(int, temp.split(','))) if temp else 0
+            map(int, temp.split(',')) if temp else 0
         temp = self.config.get('audio_processing', 'custom_channel_frequencies')
         audio_prcssng["custom_channel_frequencies"] = \
-            list(map(int, temp.split(','))) if temp else 0
+            map(int, temp.split(',')) if temp else 0
 
         self.audio_processing = Section(audio_prcssng)
 
@@ -585,7 +585,7 @@ class Section(object):
         :param dict_of_items: a dict containing key, value pairs to set
         :type dict_of_items: dict
         """
-        for key, value in dict_of_items.items():
+        for key, value in dict_of_items.iteritems():
             setattr(self, key, value)
 
     def get(self, item):
@@ -604,33 +604,33 @@ if __name__ == "__main__":
     # prints the current configuration
     cm = Configuration()
     sms_cm = Configuration(True)
-    print("Home directory set:", HOME_DIR)
-    print("Config directory set:", CONFIG_DIR)
-    print("Logs directory set:", LOG_DIR)
+    print "Home directory set:", HOME_DIR
+    print "Config directory set:", CONFIG_DIR
+    print "Logs directory set:", LOG_DIR
 
-    print("\nHardware Configuration")
-    for hkey, hvalue in cm.hardware.config.items():
-        print(hkey, "=", hvalue)
+    print "\nHardware Configuration"
+    for hkey, hvalue in cm.hardware.config.iteritems():
+        print hkey, "=", hvalue
 
-    print("\nLightshow Configuration")
-    for lkey, lvalue in cm.lightshow.config.items():
-        print(lkey, "=", lvalue)
+    print "\nLightshow Configuration"
+    for lkey, lvalue in cm.lightshow.config.iteritems():
+        print lkey, "=", lvalue
 
-    print("\nAudio Processing Configuration")
-    for akey, avalue in cm.audio_processing.config.items():
-        print(akey, "=", avalue)
+    print "\nAudio Processing Configuration"
+    for akey, avalue in cm.audio_processing.config.iteritems():
+        print akey, "=", avalue
 
-    print("\nNetwork Configuration")
-    for nkey, nvalue in cm.network.config.items():
-        print(nkey, "=", nvalue)
+    print "\nNetwork Configuration"
+    for nkey, nvalue in cm.network.config.iteritems():
+        print nkey, "=", nvalue
 
-    print("\nSMS Configuration")
-    for skey, svalue in sms_cm.sms.config.items():
-        print(skey, "=", svalue)
+    print "\nSMS Configuration"
+    for skey, svalue in sms_cm.sms.config.iteritems():
+        print skey, "=", svalue
 
-    for wckey, wcvalue in sms_cm.who_can.items():
-        print(wckey, "=", wcvalue)
+    for wckey, wcvalue in sms_cm.who_can.iteritems():
+        print wckey, "=", wcvalue
 
-    print("\nTerminal Configuration") 
-    for tkey, tvalue in cm.terminal.config.items(): 
-        print(tkey, "=", tvalue)
+    print "\nTerminal Configuration" 
+    for tkey, tvalue in cm.terminal.config.iteritems(): 
+        print tkey, "=", tvalue

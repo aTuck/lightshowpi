@@ -21,7 +21,7 @@ or
 sudo python prepostshow.py "postshow"
 """
 
-import builtins
+import __builtin__
 import logging
 import os
 import subprocess
@@ -111,7 +111,7 @@ class PrePostShow(object):
                     if 'channel_control' in transition:
                         channel_control = transition['channel_control']
 
-                        for key in list(channel_control.keys()):
+                        for key in channel_control.keys():
                             mode = key
                             channels = channel_control[key]
 
@@ -178,7 +178,7 @@ class PrePostShow(object):
 
         # insert script location into path
         sys.path.insert(0, os.path.split(self.config)[0])
-        builtins.hc = self.hc
+        __builtin__.hc = self.hc
 
         # import custom script
         script = __import__(os.path.basename(os.path.splitext(self.config)[0]))
