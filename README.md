@@ -14,8 +14,7 @@ Installation / Getting Started
 ==============================
 
 Please visit the [Getting Started Page](http://lightshowpi.org/getting-started) for details on getting
-started.  Or for those who want to just jump on in, feel free to run the install.sh script and go 
-for it :-)
+started.  For those who want to get started quickly, feel free to just run the install.sh script.
 
 Directory Structure
 ===================
